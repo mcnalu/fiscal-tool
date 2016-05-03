@@ -98,7 +98,7 @@
         <p>The UK has its own currency and central bank and so can, in principle, fund deficits by creating money. However, funding public spending in this way would violate the Maastricht treaty and can, if done to excess in the wrong circumstances, lead to inflation. Nevertheless, money creation did play a part in attempts to deal with the aftermath of the 2008 financial crisis when the Bank of England created £375 billion to purchase gilts. As a result of this, about a quarter of UK public sector debt is owed to the UK public sector. Yes, you read that correctly, the UK public sector owns its own bonds, and pays itself interest! This part of the debt is therefore not really debt at all, and in other ways UK government debt <a href="http://www.coppolacomment.com/2013/01/government-debt-isnt-what-you-think-it.html">isn't what you think it is</a>.</p>
  
         <h3>Source code</h3>
-        <p>If you know a bit of HTML5, CSS and javascript, then please take my code, alter it, improve it and share it. It's released as Free Software under the <a href="https://www.gnu.org/licenses/agpl.txt">GNU AGPL license</a> which means that if you take it and use it on a website you need to make your version available to others too.</p>
+        <p>If you know a bit of HTML5, CSS and javascript, then please take my code, alter it, improve it and share it. It's released as Free Software under the <a href="https://www.gnu.org/licenses/agpl.txt">GNU AGPL license</a> which means that if you take it and use it on a website you need to make your version available to others too. You can get the <a href="https://github.com/mcnalu/fiscal-tool">source code on github</a>.</p>
         
         <h3>References</h3>
         
@@ -620,7 +620,6 @@ var isVeryFirstDraw=true;
 function resizeCanvas(){
     isVeryFirstDraw=false;
     var c = document.getElementById("myCanvas");
-    output("hello: "+document.getElementById("main").clientHeight);
     c.width=document.getElementById("main").clientWidth;
     c.height=document.getElementById("main").clientHeight;
     var x = document.getElementsByClassName("slider");
@@ -765,7 +764,6 @@ function startAdjust(event){
         var c = document.getElementById(event.target.id);
         var y=getTouchSafeY(event,c);
 
-        output("Click at y="+y+" / "+c.height);
         var sliderYs;
         if(slider==0){
             sliderYs=taxSliderYs;

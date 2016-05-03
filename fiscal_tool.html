@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Fiscal simulator</title>
+<meta charset="UTF-8"> 
+<link rel="stylesheet" type="text/css" href="fiscal_tool.css">
+</head>
+<body onresize="resizeCanvas()">
+
+<ul class="my-navbar">
+  <li><a class="my-red" id="myCanvasItem" href="#" onclick="switchTab(this, 'myCanvas');">Diagram</a></li>
+  <li><a id="tablesItem"  href="#" onclick="switchTab(this, 'tables');">Tables</a></li>
+  <li><a id="helpItem"  href="#" onclick="switchTab(this, 'help');">Help</a></li>
+</ul>
+
+<div class="tooltip" id="main">
+    <span id="myToolTip" class="tooltiptext">Content 1</span>
+    <canvas class="tab" onmousemove="canvasMove(event)" id="myCanvas" width="300" height="300" >
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+    <div class="tab" id="tables">
+        <table id="percentages">
+        <tr><th></th><th>UK</th><th>Scot</th><th>Local</th><th>Total</th></tr>
+        <tr id="tax_percent"><td>Tax %</td><td></td><td></td><td></td><td></td></tr>
+        <tr id="spend_percent"><td>Spend %</td><td></td><td></td><td></td><td></td></tr>
+
+        <tr><td><b>£ billion</b></td><td colspan="3"></td><td></td></tr>
+        <tr id="tax"><td>Tax</td><td></td><td></td><td></td><td></td></tr>
+        <tr id="spend"><td>Spend</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td><b>Transfers</b></td><td colspan="3"></td><td></td></tr>
+        <tr id="fromScot"><td>From Scot Gov</td><td></td><td></td><td></td><td></td></tr>
+        <tr id="fromUK"><td>From UK Gov</td><td></td><td></td><td></td><td></td></tr>
+
+        <tr><td><b>After transfers</b></td><td colspan="3"></td><td></td></tr>
+        <tr id="income"><td>Income</td><td></td><td></td><td></td><td></td></tr>
+        <tr id="spend2"><td>Spend</td><td></td><td></td><td></td><td></td></tr>
+        <tr id="deficit"><td>Deficit</td><td></td><td></td><td></td><td></td></tr>
+
+        <tr><td><b>New debt costs</b></td><td colspan="3"></td><td></td></tr>
+        <tr id="borrowing"><td>Borrowing</td><td></td><td></td><td></td><td></td></tr>
+        <tr id="rate"><td>Interest rate %</td><td></td><td></td><td></td><td></td></tr>
+        <tr id="interest"><td>Interest*</td><td></td><td></td><td></td><td></td></tr>
+        </table>
+        <p>*Interest is in £ million</p>
+    </div>
+
+    <div class="tab" id="help">
+        <h2>Help</h2>
+        <p>This simulation illustrates how public money flows through Scotland's three levels of government: UK (Westminster), Scottish (Holyrood) and Local (councils).</p>
+        
+        <p>It is based on a diagram originally produced for the book <a href="http://activecitizen.scot">An Active Citizen's Guide to Scotland</a>.
+        
+        <h3>Quick start</h3>
+        <p>Play with the first two sliders to divide up tax and spending in Scotland across the three levels of government.</p>
+        <p>The third slider controls borrowing and fiscal transfers. At zero (red), all borrowing is done at the UK government level, and at max (blue/green), it is all done at Scottish and Local government levels.</p>
+        
+        <p>Pay attention to how your changes affect the deficit at each level and the extra interest that deficit incurs. The total deficit is always equal to the total public spending of Scotland less its tax revenue, but the total interest does depend on how borrowing is spread across the three levels of government.</p>
+        
+        <p>The initial numbers are close to the reality of 2015-16, although final figures for that financial year won't be published until early 2017. Press the Reset button to go back to these numbers.</p>
+        
+        <p>You can switch between the <b>Diagram</b> view and the <b>Tables</b> using the tabs at the top.</p>
+        
+        <h3>Auto fiscal framework</h3>
+        <p>The automated fiscal framework will calculate the necessary fiscal transfers between levels of government for you. If the borrow slider is set to zero (red) then fiscal transfers &mdash; the vertical arrows between governments &mdash; are set so that deficits are kept at zero for the Scottish and Local governments. If the borrow slider is at full (blue/green) then all fiscal transfers are zero  and Scottish and Local governments fund their deficits by borrowing.</p>
+        
+        <p>The interest shown is the extra interest incurred per year if borrowing is done to cover the deficit. It is <b>not</b> the total interest paid on all debt; that will be substantially larger.</p>
+        
+        <p>If you uncheck Auto fiscal framework, then the borrow slider will disappear and you can set fiscal transfers manually, and also alter tax and spend totals for Scotland.</p>
+
+        <h3>The sliders</h3>
+        <p>There are three sliders which you can adjust:</p>
+        <ul>
+            <li><b>Tax</b> &mdash; This slider has two handles allow you to divide tax flows between the three levels of government. These are shown on the diagram by the blue numbers next to right-to-left arrows.</li>
+            <li><b>Spend</b> &mdash; Similar to tax slider but the two handles allow you to divide spending between the three levels of government. These are shown by the red numbers next to left-to-right arrows.</li>
+            <li><b>Borrow</b> &mdash; This slider has one handle and it controls the amount of borrowing permitted by Scottish and Local governments. When set to zero (red), all borrowing is done at the UK level and fiscal transfers are set to ensure the deficit is zero. When set to full (blue/green), all fiscal transfers are zero and borrowing is used to fund the deficit at each level of government. This is known as <b>fiscal autonomy</b>.</li>
+        </ul>
+        
+        <h3>How do I declare independence?</h3>
+        
+        <p>This can be simulated by zeroing tax and spend for the UK government and directing all borrowing to Scottish and Local governments: drag the upper slider handles for tax and spend to the very top, and the borrow slider handle to the top too.</p>
+        
+        <p>The Scottish Government interest rate of 2.5% refers to current borrowing arrangements within the UK (see below for more info). No one can say for sure what this rate will be for an independent Scotland, but with a deficit of £15 billion or 10% of GDP, it is likely to be higher than 2.5%. You can set your own interest rate by unchecking Auto fiscal framework and entering a value in the table below it. You might also want to consider altering the the Spending total to account for possible reductions in defence spending but also new costs of the Scottish Government expanding its administration and paying interest on its borrowing.</p>
+        
+        <h3>What's a fiscal flow?</h3>
+        The word <b>fiscal</b> refers to the flows of money involved in tax and public spending, or, in other words, the flow between the private and public sectors.</p>
+        <p>The three levels of government &mdash; the public sector &mdash; are shown on the left as coloured  squares and the private sector of Scotland is shown as the oval on the right.</p>
+        <p>Arrows going left represent tax, and those going right represent spending. Arrows going down represent fiscal transfers between levels of government.</p>
+        <p>The total amount of money leaving each level of government (spending plus fiscal transfers out) minus income (tax plus fiscal transfers in) is the called <b>deficit</b> (or to be strictly accurate, the net fiscal balance).</p>
+        <p>Deficits are usually matched by borrowing and at present this is almost entirely done at the UK level (it can borrow most cheaply). More detail on how tax funds, or rather doesn't fund spending can be found below.</p>
+         
+        <h3>More details</h3>
+        
+        <p>Tax is a flow of money from the private sector to the public sector. Most tax comes from people's income and the VAT on stuff that they buy. Public spending is a flow of money in the opposite direction and provides money needed for building roads or schools and for paying nurses or teachers.</p>
+        
+        <p>The tax collected almost always falls short of public spending and the difference is the deficit. The UK has run a deficit in 54 of the last 60 years.</p>
+        <p>Deficits can be funded in a number of ways. The Scottish and Local Government deficits are mainly funded by fiscal transfers with borrowing playing a minor role. The UK government funds its deficit with borrowing by carving up new debt into £100 chunks called government bonds. UK government bonds are referred to as gilts.</p>
+        
+        <p>The UK has its own currency and central bank and so can, in principle, fund deficits by creating money. However, funding public spending in this way would violate the Maastricht treaty and can, if done to excess in the wrong circumstances, lead to inflation. Nevertheless, money creation did play a part in attempts to deal with the aftermath of the 2008 financial crisis when the Bank of England created £375 billion to purchase gilts. As a result of this, about a quarter of UK public sector debt is owed to the UK public sector. Yes, you read that correctly, the UK public sector owns its own bonds, and pays itself interest! This part of the debt is therefore not really debt at all, and in other ways UK government debt <a href="http://www.coppolacomment.com/2013/01/government-debt-isnt-what-you-think-it.html">isn't what you think it is</a>.</p>
+ 
+        <h3>Source code</h3>
+        <p>If you know a bit of HTML5, CSS and javascript, then please take my code, alter it, improve it and share it. It's released as Free Software under the <a href="https://www.gnu.org/licenses/agpl.txt">GNU AGPL license</a> which means that if you take it and use it on a website you need to make your version available to others too.</p>
+        
+        <h3>References</h3>
+        
+         <ul>
+            <li>Total spending and revenue figures are guided by values from <a href="http://www.gov.scot/Publications/2016/03/3692">GERS 2014-15</a> published in March 2016 by the Scottish Government. The total revenue figure of £53 billion for 2014-15 includes a geographic North Sea share. Total real terms spending in Scotland for all three levels of government has remained in the range £68 to £70 billion for the last five years so I've assumed a value of £68 billion for 2015-16.</li>
+            <li>Revenue figures were also cross-checked against the latest available <a href="http://www.gov.scot/topics/statistics/browse/economy/QNA2015Q3">Scotland's Quarterly National Accounts</a> published by the Scottish Government in February 2016. These give revenue figures for 2015Q2 and Q3 which suggest that 2015-16 will see a total revenue similar to that of 2014-15, i.e. £53 billion.</li>
+            <li>Scottish Government spending, and fiscal transfers from the UK to Scottish governments, and from Scottish to Local governments are from the <a href="http://www.gov.scot/Publications/2015/12/9056/2">Draft Scottish Budget 2016-17</a> published by the Scottish Government in December 2015.</li>
+            <li>Local Government spending, NDR (business rates), council tax and other fee revenues are from <a href="http://www.gov.scot/Publications/2016/02/1326">Local Government Finance Statistics</a> published by the Scottish Government in February 2016.
+            <li>The block grant and other transfers from the UK to Scottish Government, NDR and tax through Revenue Scotland are cross-checked against the <a href="https://www.gov.uk/government/publications/annual-report-and-accounts-2014-15">Scottish Office accounts</a> published by the UK government in July 2015.</li>
+            <li>The UK interest rate is set at the <a href="http://markets.ft.com/research/Markets/Bonds"> yield for 10yr gilts</a> as of 1 May 2016.</li>
+            <li>For a clear summary of public borrowing in Scotland see <a href="http://www.niesr.ac.uk/blog/scotland%E2%80%99s-fiscal-framework#_ftnref8">this article by Angus Armstrong on the NIESR blog</a> from July 2015. It describes the new borrowing powers of the Scottish Government and their limitations. He highlights the National Loan Fund (NLF) as a likely source of borrowing in years to come and it has 2.5% interest rate which is the default value in this simulation. This rate is only applicable if Scotland remains within the UK.</li>
+            <li>The Local Government interest rate of 4.6% is calculated from the interest payments for 2014-15 quoted in the Local Government Finance Statistics (see link above) and the total outstanding debt (also mentioned in above mentioned NIESR blog post). This makes this a historical rate and arguably too high for the present low interest times. However, I've not found a more reliable source for this interest rate as yet.</li>
+        </ul>
+         
+    </div>
+    
+</div>
+
+<div id="controls">
+    <div id="sliders">
+    <div onmousedown="startAdjust(event)" ontouchstart="startAdjust(event)"
+    onmousemove="adjustSlider(event)" ontouchmove="adjustSlider(event)"
+    onmouseup="stopAdjust(event)" ontouchend="stopAdjust(event)"
+    onmouseout="stopAdjust(event)" class="slider">
+        <p>Tax</p>
+        <canvas id="taxCanvas" class="sliderCanvas" width="40" height="400">
+            Tax
+        </canvas>
+    </div>
+
+    <div onmousedown="startAdjust(event)" ontouchstart="startAdjust(event)"
+    onmousemove="adjustSlider(event)" ontouchmove="adjustSlider(event)"
+    onmouseup="stopAdjust(event)" ontouchend="stopAdjust(event)"
+    onmouseout="stopAdjust(event)" class="slider">
+        <p>Spend</p>
+        <canvas class="sliderCanvas" id="spendCanvas" width="40" height="400">
+            Spend
+        </canvas>
+    </div>
+    
+    <div onmousedown="startAdjust(event)" ontouchstart="startAdjust(event)"
+    onmousemove="adjustSlider(event)" ontouchmove="adjustSlider(event)"
+    onmouseup="stopAdjust(event)" ontouchend="stopAdjust(event)"
+    onmouseout="stopAdjust(event)" class="slider">
+        <p>Borrow</p>
+        <canvas class="sliderCanvas" id="borrowCanvas" width="40" height="400">
+            Borrow
+        </canvas>
+    </div>
+    </div>
+    
+    <div id="advanced">
+        <input checked type="checkbox" id="autoFiscal" onchange="update()">Auto fiscal framework
+        <button type="button" onclick="resetButton()">Reset</button>
+
+        <div id="table">
+        <table>
+        <tr><th></th><th>UK</th><th>Scot</th><th>Local</th></tr>
+        <tr><td>to Scot</td>
+            <td><input onchange="buttonUpdate()" id="ukscot" type="text" size="3"></td>
+            <td>-</td><td>-</td>
+        </tr>
+        <tr><td>to Local</td>
+            <td><input onchange="buttonUpdate()" id="uklocal" type="text" size="3"></td>
+            <td><input onchange="buttonUpdate()" id="scotlocal" type="text" size="3"></td>
+            <td>-</td>
+        </tr>
+        <tr><td>interest %</td>
+            <td><input  onchange="buttonUpdate()" id="ukrate" type="text"></td>
+            <td><input  onchange="buttonUpdate()" id="scotrate" type="text"></td>
+            <td><input  onchange="buttonUpdate()" id="localrate" type="text"></td>
+        </table>
+        <table>
+        <tr><td><b>Totals</b></td></tr>
+        <tr><td>Tax</td><td align="center"><input onchange="buttonUpdate()" id="totalRevenue" type="text"></td></tr>
+        <tr><td>Spend</td><td align="center"><input onchange="buttonUpdate()" id="totalSpend" type="text"></td></tr>
+        </tr>
+        </table>
+        </div>
+    </div>
+</div>
+
+<div id="footer">
+Copyright © Andrew Conway 2016
+</div>
+
+<script>
+/* Separate update method into model and display. */
+var totalRevenue;
+var totalSpend;
+var borrowPercent;
+var fromUKtoLocal;
+var rowNames=["tax_percent","spend_percent","tax","spend","fromScot"
+                ,"fromUK","income","spend2","deficit","borrowing"
+                ,"rate","interest"];
+var rowValues=[];
+var taxPercent,spendPercent,tax,spend,fromScot,fromUK
+    ,income,spend2,deficit,borrowing,rate,interest;
+reset();
+
+var activeAreas=[];
+var UK_LOCAL="uklocal";
+var UK_SCOT="ukscot";
+var SCOT_LOCAL="scotlocal";
+
+var TAX_CANVAS="taxCanvas";
+var SPEND_CANVAS="spendCanvas";
+var BORROW_CANVAS="borrowCanvas";
+var sliders=[TAX_CANVAS,SPEND_CANVAS,BORROW_CANVAS];
+var BLACK="#000000";
+var RED="#f81037";
+var BLUE="#316bdd";
+var GOV_RED="#FF8080";
+var GOV_BLUE="#5f8dd3";
+var GOV_GREEN="#44aa00";
+var govWidth;
+var govHeight;
+var govMargin;
+var fontHeight;
+var smallFontHeight=fontHeight;
+var ukGov;
+var scotGov;
+var localGov;
+var scotland;
+
+function reset(){
+    totalRevenue=53.;
+    totalSpend=68.;
+    borrowPercent;
+    fromUKtoLocal=2.5;
+    borrowPercent=0.;
+    for(i=0;i<rowNames.length;i++){
+        rowValues[i]=[0,0,0];
+    }
+    rowValues[0]=[90,6,4];//tax_percent
+    taxPercent=rowValues[0];
+    rowValues[1]=[37,40,23];//spend_percent
+    spendPercent=rowValues[1];
+    tax=rowValues[2];
+    spend=rowValues[3];
+    rowValues[4]=[0,0,11];//fromScot
+    fromScot=rowValues[4];
+    rowValues[5]=[0,35,fromUKtoLocal];//fromUK
+    fromUK=rowValues[5];
+    income=rowValues[6];
+    spend2=rowValues[7];
+    deficit=rowValues[8];
+    borrowing=rowValues[9];
+    rowValues[10]=[1.6,2.5,4.6];//rate
+    rate=rowValues[10];
+    interest=rowValues[11];
+}
+
+function resetButton(){
+    reset();
+    update();
+}
+
+function rect(x, y, width, height, value) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    if(value!==undefined){
+        this.value=value;
+    }
+    this.x1=x+0.1*width;
+    this.xc=x+width/2.;
+    this.right=x+width;
+    this.right1=this.right-0.1*width;
+    this.y1=y+0.1*height;
+    this.yc=y+height/2.;
+    this.bottom=y+height;
+    this.bottom1=this.bottom-0.1*height;
+    this.draw = function (ctx) {
+        ctx.fillRect(x,y,width,height);
+    };
+    this.drawLabel = function (ctx,label,yOffset) {
+        ss=label.split("\n");
+        ctx.save();
+        var yy=y+fontHeight; 
+        if(yOffset!==undefined){
+            yy+=yOffset;
+        }
+        for(i=0;i<ss.length;i++){
+            var m=ctx.measureText(ss[i]);
+            ctx.fillText(ss[i],this.xc-m.width/2,yy);
+            ctx.font = "normal "+smallFontHeight+"px Arial";
+            yy+=smallFontHeight;
+        }
+        ctx.restore();
+    };
+}
+
+function switchTab(element, name) {
+  x = document.getElementsByClassName("tab");
+  for(i=0;i<x.length;i++){
+    x[i].style.display="none";
+    document.getElementById(x[i].id+"Item").className="";
+  }
+  document.getElementById(name).style.display="block";
+  document.getElementById(name+"Item").className="my-red";
+  if(name=="myCanvas"){
+    document.getElementById("main").style.overflow="hidden";
+  } else {//enable scrolling for help and table
+    document.getElementById("main").style.overflow="auto";
+  }
+  update();
+}
+
+function canvasMove(event){
+    var c = document.getElementById("myCanvas");
+    var x = event.clientX-c.getBoundingClientRect().left;
+    var y = event.clientY-c.getBoundingClientRect().top;
+    var t=document.getElementById("myToolTip");
+    var found=false;
+    for(i in activeAreas){
+        if(activeAreas[i].containsPoint(x,y)){
+            t.style.visibility="visible";
+            t.style.marginLeft=activeAreas[i].right+"px";
+            t.style.marginTop=activeAreas[i].bottom+"px";
+            t.innerHTML=activeAreas[i].message;
+            found=true;
+            break;
+        }
+    }
+    if(!found){
+        t.style.visibility="hidden";
+    }
+}
+
+function activeArea(x,y,width,height,message){
+    this.x=x;
+    this.y=y;
+    this.width=width;
+    this.height=height;
+    this.message=message;
+    this.right=this.x+this.width;
+    this.bottom=this.y+this.height;
+    this.containsPoint = function(xx,yy){
+        if(xx>this.x && xx<this.right && yy>this.y && yy<this.bottom){
+            return true;
+        }
+        return false;    
+    }
+}
+
+window.onload = function() {
+    update();
+}
+
+function round(x){
+    return Math.round(x*10)/10.;
+}
+
+function setDevolution(percent,canvas,iGov){
+    var v;
+    if(canvas==TAX_CANVAS){
+        v=taxPercent;
+    } else if(canvas==SPEND_CANVAS){
+        v=spendPercent;
+    }
+    if(iGov==0){
+        v[0]=percent;
+        if(v[0]>(100-v[2])){
+            v[0]=100-v[2];
+        } else if(v[0]<0.5){
+            v[0]=0;
+        }
+    } else if(iGov==1){
+        v[2]=100-percent;
+        if(v[2]>100-v[0]){
+            v[2]=100-v[0];
+        } else if(v[2]<0.5){
+            v[2]=0;
+        }
+    }
+    v[1]=100-v[0]-v[2];
+    update();
+}
+
+function setBorrowing(percent){
+    borrowPercent=100-percent;
+    if(borrowPercent>100){
+        borrowPercent=100.;
+    } else if(borrowPercent<0.5) {
+        borrowPercent=0;
+    }
+    update();
+}
+
+function fixTransfers(){
+    updateModel();//ensures tax and spend are calculated
+    /*if(deficit[0]<0){//Reduces tax to UK gov automatically
+        var taxUK=tax[0]+deficit[0];
+        var taxScot=tax[1]-deficit[0];
+        taxPercent[0]=100.*taxUK/totalRevenue;
+        taxPercent[1]=100.*taxScot/totalRevenue;
+        updateModel();
+    }*/
+    frac=1.-borrowPercent/100.;
+    fromUK[2]=frac*fromUKtoLocal;
+    //Transfer from Scot Gov to Local Gov
+    fromScot[2]=frac*(spend[2]-tax[2]-fromUK[2]);
+    //Transfer from UK Gov to Scot Gov
+    fromUK[1]=frac*(spend[1]+fromScot[2]-tax[1]);
+}
+
+function buttonUpdate(){
+    validate(UK_SCOT,fromUK,1);
+    validate(UK_LOCAL,fromUK,2);
+    validate(SCOT_LOCAL,fromScot,2);
+    validate("ukrate",rate,0);
+    validate("scotrate",rate,1);
+    validate("localrate",rate,2);
+    totalRevenue=validate("totalRevenue");
+    totalSpend=validate("totalSpend");
+    update();
+}
+
+function validate(id,v,i){
+    x = document.getElementById(id).value;
+    if (!isNaN(x)) {
+        if(v===undefined){
+            return Number(x);
+        } else {
+            v[i]=Number(x);        
+        }
+    }
+}
+
+function update(){
+    if(document.getElementById("autoFiscal").checked){
+        fixTransfers();
+    }
+    updateModel();
+    updateDisplay();
+}
+
+function updateModel(){
+    transfersOut=[0,0,0];
+    for(j=0;j<3;j++){
+        transfersOut[0]+=fromUK[j];
+        transfersOut[1]+=fromScot[j];  
+    }
+    
+    for(i=1;i<=3;i++){
+        tax[i-1]=totalRevenue*taxPercent[i-1]/100.;
+        spend[i-1]=totalSpend*spendPercent[i-1]/100.;
+        spend2[i-1]=spend[i-1];
+        income[i-1]=tax[i-1]+fromScot[i-1]+fromUK[i-1]-transfersOut[i-1];
+        deficit[i-1]=spend[i-1]-income[i-1];
+        borrowing[i-1]=deficit[i-1];
+        if(borrowing[i-1]<0){
+            borrowing[i-1]=0.;
+        }
+        //interest in millions
+        interest[i-1]=Math.round(1000.*rate[i-1]*borrowing[i-1]/100.);
+    }
+}
+
+function totalArray(arr,round){
+    total=0.;
+    for(i in arr){
+        total+=Number(arr[i]);
+    }
+    if(round!==undefined && round){
+        total=Math.round(total);
+    }
+    return total;
+}
+
+function updateDisplay(){
+    for(r=0;r<rowNames.length;r++){
+        var row = document.getElementById(rowNames[r]).children;
+        var values = rowValues[r];
+        for(i=1;i<=3;i++){
+            row[i].innerHTML=round(values[i-1]);
+        }
+        row[4].innerHTML=totalArray(values,true);
+        row[4].style.fontWeight="bold";
+    }
+    updateTable();
+    
+    prepareCanvas();
+    drawTaxTransferLines();
+    drawBackground();
+    taxSliderYs=drawSlider(TAX_CANVAS,taxPercent);
+    spendSliderYs=drawSlider(SPEND_CANVAS,spendPercent);
+    if(document.getElementById("autoFiscal").checked){
+        document.getElementById(BORROW_CANVAS).style.visibility="visible";
+        document.getElementById("table").style.visibility="hidden";
+        borrowSliderYs=drawSingleSlider(BORROW_CANVAS,100-borrowPercent);
+    } else {
+        document.getElementById(BORROW_CANVAS).style.visibility="hidden";
+        document.getElementById("table").style.visibility="visible";
+        borrowSliderYs=null;
+    }
+    drawSpendLines();
+    if(isVeryFirstDraw){//Force redraw with correct sizes first time
+        resizeCanvas();
+    }
+}
+
+function updateTable(){
+    document.getElementById(UK_SCOT).value=round(fromUK[1]);
+    document.getElementById(UK_LOCAL).value=round(fromUK[2]);
+    document.getElementById(SCOT_LOCAL).value=round(fromScot[2]);
+    document.getElementById("ukrate").value=rate[0];
+    document.getElementById("scotrate").value=rate[1];
+    document.getElementById("localrate").value=rate[2];
+    document.getElementById("totalRevenue").value=totalRevenue;   
+    document.getElementById("totalSpend").value=totalSpend;   
+}
+
+function drawTaxTransferLines(){
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+    
+    var taxUKTip="All this tax is collected by HMRC, but some rates are set by the Scottish Government.";
+    var taxScotTip="Tax collected by Revenue Scotland (LBTT & SLfT) plus NDR (business rates) received via councils.";
+    var taxLocaltip="Council Tax and fees collected by councils.";
+    var transferUKLocalTip="Mostly housing benefit.";
+    var transferUKScotTip="Mostly the block grant, but also some other transfers.";
+    var transferScotLocalTip="Block grant including NDR (business rates) redistribution.";
+    /* Tax lines */
+    drawLine(ctx,Math.round(tax[0]),1,BLUE,taxUKTip
+                ,scotland.xc,scotland.y+govMargin
+                ,scotland.x, ukGov.yc, ukGov.right, ukGov.yc);    
+    drawLine(ctx,Math.round(tax[1]),1,BLUE,taxScotTip
+        ,scotland.x1,scotland.yc,scotGov.right, scotGov.yc);
+    drawLine(ctx,Math.round(tax[2]),-0.6,BLUE,taxLocaltip
+        ,scotland.xc,scotland.bottom-govMargin
+        ,scotland.x, localGov.yc, localGov.right, localGov.yc);
+    /* Transfer lines */
+    ctx.setLineDash([10,4]);
+    drawLine(ctx,Math.round(fromUK[2]),1,BLACK,transferUKLocalTip
+        ,ukGov.x1,ukGov.bottom,ukGov.x1,localGov.y);
+    drawLine(ctx,Math.round(fromUK[1]),1,BLACK,transferUKScotTip
+        ,ukGov.xc,ukGov.bottom,ukGov.xc,scotGov.y);
+    drawLine(ctx,Math.round(fromScot[2]),1,BLACK,transferScotLocalTip
+        ,scotGov.xc,scotGov.bottom,scotGov.xc,localGov.y);
+}
+
+function drawSpendLines(){
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+    /* Spending lines */
+    ctx.setLineDash([2,6]);
+    var spendUKTip="Spending by UK gov on defence, pensions & benefits.";
+    var spendScotTip="Spending by Scot gov on health, pensions, universities & colleges, justice, emergency services. ";
+    var spendLocalTip="Spending on schools, social work, housing, debt repayment & interest, environmental services, culture, roads.";
+    drawLine(ctx,Math.round(spend[0]),1.5,RED,spendUKTip
+        ,ukGov.right,ukGov.bottom1,ukGov.right+govWidth,scotland.y
+        ,scotland.x1+govMargin,scotland.y1);
+        //ukGov.bottom+govMargin);
+    drawLine(ctx,Math.round(spend[1]),1,RED,spendScotTip
+        ,scotGov.right,scotGov.bottom1
+        ,scotland.x,scotGov.bottom1);
+    drawLine(ctx,Math.round(spend[2]),-1.5,RED,spendLocalTip
+        ,localGov.right,localGov.y1,localGov.right+govWidth,scotland.bottom
+        ,scotland.x1+govMargin,scotland.bottom1);
+    ctx.setLineDash([]);
+}
+
+function drawLine(ctx,label,pos,col,toolTipText,x1,y1,x2,y2,x3,y3){
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    var angle,xl,yl;
+    if(x3 === undefined){
+        ctx.lineTo(x2,y2);
+        angle=Math.atan2(y2-y1,x2-x1);
+        x3=x2;
+        y3=y2;
+        xl=(x1+x2)/2.;
+        yl=(y1+y2)/2.;
+    } else {
+        ctx.quadraticCurveTo(x2,y2,x3,y3);
+        angle=Math.atan2(y3-y2,x3-x2);
+        xl=x2;
+        yl=y2;
+    }
+    ctx.stroke();
+    drawArrow(ctx,x3,y3,angle);
+
+    drawLineLabel(ctx,label,pos,col,toolTipText,xl,yl,angle);
+}
+
+function drawLineLabel(ctx,label,pos,col,toolTipText,xl,yl,angle){
+    var dr=fontHeight*pos;
+    var xt=xl-dr*Math.sin(angle);
+    var yt=yl+dr*Math.cos(angle);
+    ctx.save();
+    ctx.font = "bold "+fontHeight+"px Arial";
+    ctx.fillStyle = col;
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(label,xt,yt);
+    ctx.restore();
+    activeAreas.push(new activeArea(xt-fontHeight/2,yt-fontHeight/2
+        ,fontHeight,fontHeight,toolTipText));
+}
+
+/* Arrow with angle=0 points to the right */
+function drawArrow(ctx,x,y,angle){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(-20,-5);
+    ctx.lineTo(-20,5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
+var isVeryFirstDraw=true;
+function resizeCanvas(){
+    isVeryFirstDraw=false;
+    var c = document.getElementById("myCanvas");
+    output("hello: "+document.getElementById("main").clientHeight);
+    c.width=document.getElementById("main").clientWidth;
+    c.height=document.getElementById("main").clientHeight;
+    var x = document.getElementsByClassName("slider");
+    for(i=0;i<x.length;i++){
+        var p = x[i].children[0]
+        c = x[i].children[1];
+        c.width=0.7*x[i].clientWidth;
+        c.height=0.95*(x[i].clientHeight-p.clientHeight);
+    }    
+    updateDisplay();    
+}
+
+function prepareCanvas(ctx){
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.lineWidth=2;
+
+    govWidth=0.22*Math.min(c.width,c.height);
+    govHeight=govWidth;
+    govMargin=0.05*Math.min(c.width,c.height);
+    fontHeight=24*(Math.min(c.width,c.height)/600.);
+    smallFontHeight=0.75*fontHeight;
+    
+    ctx.font = "normal "+smallFontHeight+"px Arial";
+    var s="Figures in £ billion, except interest";
+    var m=ctx.measureText(s);
+    ctx.fillText(s,c.width-1.05*m.width,fontHeight);
+    ctx.font = "bold "+fontHeight+"px Arial";
+
+    ukGov = new rect(govMargin,govMargin,govWidth,govHeight);
+    scotGov = new rect(2*govMargin
+        ,c.height/2-govHeight/2,govWidth,govHeight);
+    localGov = new rect(govMargin
+        ,c.height-govMargin-govHeight,govWidth,govHeight);
+    var x=c.width-govMargin-govWidth;
+    var y=c.height/2;
+    var h=0.22*c.height/0.7;
+    scotland = new rect(x-govWidth,y-h,2*govWidth,2*h);
+}
+
+function drawBackground(){
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+    
+    ctx.fillStyle = GOV_RED;
+    ukGov.draw(ctx);
+    ctx.fillStyle = "#000000";
+    ukGov.drawLabel(ctx,"UK Gov\n\nDeficit "+Math.round(deficit[0])
+        +"\n\nInterest "+interest[0]+"m");
+
+    ctx.fillStyle = GOV_BLUE;
+    scotGov.draw(ctx);
+    ctx.fillStyle = "#000000";
+    scotGov.drawLabel(ctx,"Scot Gov\n\nDeficit "+Math.round(deficit[1])
+        +"\n\nInterest "+interest[1]+"m");
+    
+    ctx.fillStyle = GOV_GREEN;
+    localGov.draw(ctx);
+    ctx.fillStyle = "#000000";
+    localGov.drawLabel(ctx,"Local Gov\n\n Deficit "+Math.round(deficit[2])
+        +"\n\nInterest "+interest[2]+"m");
+    
+    scale=scotland.width/scotland.height;
+    ctx.save();
+    ctx.scale(scale, 1);
+    ctx.beginPath();
+    ctx.arc(scotland.xc/scale, scotland.yc, 0.5*scotland.width/scale
+        , 0, Math.PI*2, false);
+    ctx.fillStyle = "#87cdde";
+    ctx.fill();
+    ctx.restore();
+    scotland.drawLabel(ctx,"Scotland\n\nIts people\nand\nbusinesses"
+        ,scotland.height/2-2.5*fontHeight);
+        
+    var totals = new rect(c.width-1.1*govWidth
+        ,c.height-5*fontHeight
+        ,govWidth,4.4*fontHeight);
+    ctx.fillStyle = "#FFFFFF";
+    totals.draw(ctx);
+    ctx.fillStyle = "#000000";    
+    totals.drawLabel(ctx,"Totals\n\nDeficit "+totalArray(deficit,true)
+    +"\n\nInterest "+totalArray(interest,true)+"m");
+
+}
+
+var handleHeight=20;
+var yOffset=handleHeight/2;
+function drawSlider(canvasId,values){
+    var c = document.getElementById(canvasId);
+    var ctx = c.getContext("2d");
+    var height = c.height-2*yOffset;
+    var dy1=values[0]*height/100.;
+    var dy2=values[1]*height/100.;
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.fillStyle = GOV_RED;
+    ctx.fillRect(0,yOffset,c.width,dy1);
+    ctx.fillStyle = GOV_BLUE;
+    ctx.fillRect(0,yOffset+dy1,c.width,dy2);
+    ctx.fillStyle = GOV_GREEN;
+    ctx.fillRect(0,yOffset+dy1+dy2,c.width,height-dy1-dy2);
+    //Draw handles
+    ctx.fillStyle = "#444444";
+    ctx.fillRect(5,yOffset+dy1+dy2-handleHeight/2,c.width-10,handleHeight);
+    ctx.fillStyle = BLACK;
+    ctx.fillRect(5,yOffset+dy1-handleHeight/2,c.width-10,handleHeight);
+    return [yOffset+dy1,yOffset+dy1+dy2];
+}
+
+function drawSingleSlider(canvasId,value){
+    var c = document.getElementById(canvasId);
+    var ctx = c.getContext("2d");
+    var height = c.height-2*yOffset;
+    var dy1=value*height/100.;
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.fillStyle = GOV_RED;
+    ctx.fillRect(0,yOffset,c.width,dy1);
+    ctx.fillStyle = GOV_BLUE;
+    ctx.fillRect(0,yOffset+dy1,c.width/2,height-dy1);
+    ctx.fillStyle = GOV_GREEN;
+    ctx.fillRect(c.width/2,yOffset+dy1,c.width/2,height-dy1);    
+    ctx.fillStyle = BLACK;
+    ctx.fillRect(5,yOffset+dy1-handleHeight/2,c.width-10,handleHeight);
+    return [yOffset+dy1,-1];
+}
+
+var sliderAdjusting=-1;
+var taxSliderYs=[],spendSliderYs=[],borrowSliderYs=[];
+
+function getTouchSafeY(event,c){
+    if(event.touches===undefined){            
+        return event.clientY-c.getBoundingClientRect().top;
+    } else {
+        return event.touches[0].clientY-c.getBoundingClientRect().top;
+    }
+}
+
+function startAdjust(event){
+    slider=sliders.indexOf(event.target.id);
+    if(slider>=0) {
+        var c = document.getElementById(event.target.id);
+        var y=getTouchSafeY(event,c);
+
+        output("Click at y="+y+" / "+c.height);
+        var sliderYs;
+        if(slider==0){
+            sliderYs=taxSliderYs;
+        } else if(slider==1){
+            sliderYs=spendSliderYs;
+        } else if(borrowSliderYs != null && slider==2){
+            sliderYs=borrowSliderYs;
+        }
+        var yTop=yOffset+handleHeight;
+        if(y<yTop && sliderYs[1]<yTop){//fix issue near top
+            sliderAdjusting=1;
+        } else if(Math.abs(y-sliderYs[0])<handleHeight){
+            sliderAdjusting=0;
+        } else if(Math.abs(y-sliderYs[1])<handleHeight){
+            sliderAdjusting=1;
+        }
+    }
+    event.preventDefault();
+}
+
+function stopAdjust(event){
+    sliderAdjusting=-1;
+    event.preventDefault();
+}
+
+function adjustSlider(event) {
+    if(sliderAdjusting>=0){
+        var c = document.getElementById(event.target.id);
+        var y=getTouchSafeY(event,c);
+        var height = c.height-2*yOffset;
+        percent=100.*(y-yOffset)/height;
+        if(event.target.id==BORROW_CANVAS){
+            setBorrowing(percent);
+        } else {
+            setDevolution(percent,event.target.id,sliderAdjusting);
+        }
+    }
+    event.preventDefault();
+}
+
+function output(message){
+    document.getElementById("footer").innerHTML=message;
+}
+
+</script>
+
+</body>
+</html> 
